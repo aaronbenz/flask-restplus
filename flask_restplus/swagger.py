@@ -428,6 +428,13 @@ class Swagger(object):
                 'items': self.serialize_schema(model),
             }
 
+        elif isinstance(model, dict):
+            out = {}
+
+            [out.update({k: self.serialize_schema(model[k])}) for k in model.iterkeys()]
+
+            return {'properties': out}
+
         elif isinstance(model, Model):
             self.register_model(model)
             return ref(model)
