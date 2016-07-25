@@ -428,6 +428,13 @@ class Swagger(object):
                 'items': self.serialize_schema(model),
             }
 
+        elif isinstance(model, dict):
+            out = {}
+
+            [out.update({k: self.serialize_schema(model[k])}) for k in model.iterkeys()]
+
+            return {'properties': out}
+
         elif isinstance(model, Model):
             self.register_model(model)
             return ref(model)
@@ -450,6 +457,13 @@ class Swagger(object):
     def register_model(self, model):
         name = model.name if isinstance(model, Model) else model
         if name not in self.api.models:
+            if name == "temp":
+                if isinstance(model, Model):
+                    for parent in model.__parents__:
+                        self.register_model(parent)
+                    for field in itervalues(model):
+                        self.register_field(field)
+                return ref(model)
             raise ValueError('Model {0} not registered'.format(name))
         specs = self.api.models[name]
         self._registered_models[name] = specs
